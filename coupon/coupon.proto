@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package coupon;
+
+option go_package = "./proto/coupon/coupon";
+
+message CouponAddReq { //优惠卷添加请求 (Token大师)
+  string name = 1;       // 优惠券名称（如:上海周中打车券）
+  int32 type = 2;        // 类型: 1=折扣券, 2=现金券, 3=免费乘车
+  double value = 3;      // 面值/折扣率（现金存金额，折扣存0-100的数值）
+  double min_amount = 4;  // 最低消费门槛（满X元可用）
+  TimeLocationRule time_location_rule = 5; // 适用时间地点规则
+  int32 issue_count = 6; // 发行总数量限制
+  int32 status = 7;      // 状态: 1=草稿, 2=已发布, 3=已下架, 4=已结束
+}
+
+message CouponAddResp { //优惠卷添加响应 (Token大师)
+  string message = 1;
+}
+
+message TimeRange {
+  string start = 1; // "07:00"
+  string end   = 2; // "09:00"
+}
+
+// 对应Go的TimeLocationRule结构体
+message TimeLocationRule {
+  repeated string cities      = 1; // 适用城市列表
+  repeated string areas       = 2; // 适用行政区列表（可选）
+  repeated TimeRange time_ranges = 3; // 适用时间段列表
+  repeated string car_types   = 4; // 适用车型列表
+}
+
+message CouponIssueReq { //优惠卷发放请求 (Token大师)
+  int64  user_id          = 1;
+  int64  time_location_id = 2;
+  string obtain_time      = 3;
+  string expire_time      = 4;
+  int64  source_type      = 5;
+}
+
+message CouponIssueResp { //优惠卷发放响应 (Token大师)
+  string message = 1;
+}
+
+message CouponDisplayReq { //优惠卷展示请求 (Token大师)
+  int64  user_id     = 1;
+  string name        = 2;
+  int64  source_type = 3;
+}
+
+message CouponDisplayResp { //优惠卷展示响应 (Token大师)
+  repeated CouponDisplayData data = 1;
+}
+
+message CouponDisplayData { //优惠卷展示数据 (Token大师)
+  string obtain_time               = 1;
+  string expire_time               = 2;
+  string source_type               = 3;
+  string name                      = 4;
+  string value                     = 5;
+  double min_amount                = 6;
+  string time_location_rule        = 8;
+  repeated string areas            = 7;
+  repeated string cities           = 9;
+  repeated string car_types        = 10;
+  string          time_ranges      = 11;
+}
+
+service CouponService {
+  rpc CouponAdd(CouponAddReq) returns (CouponAddResp); //优惠卷添加 (Token大师)
+  rpc CouponIssue(CouponIssueReq) returns (CouponIssueResp); //优惠卷发放 (Token大师)
+  rpc CouponDisplay(CouponDisplayReq) returns (CouponDisplayResp); //优惠卷展示 (Token大师)
+}
